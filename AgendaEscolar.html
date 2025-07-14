@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agenda Escolar Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+      color: #333;
+    }
+
+    header {
+      background-color: #004085;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    section {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    section h2 {
+      margin-top: 0;
+      color: #004085;
+      font-size: 20px;
+      border-left: 5px solid #004085;
+      padding-left: 10px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    form input,
+    form select,
+    form button {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    form button {
+      background-color: #004085;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    form button:hover {
+      background-color: #002c5c;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      background-color: #e9f0fa;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-left: 5px solid #004085;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 0 10px;
+      }
+
+      form input,
+      form select,
+      form button {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Agenda Escolar Digital</h1>
+  </header>
+
+  <main>
+    <section>
+      <h2>Cadastro de Aluno</h2>
+      <form id="form-aluno">
+        <input type="text" id="nome" placeholder="Nome do aluno" required />
+        <input type="text" id="turma" placeholder="Turma" required />
+        <button type="submit">Cadastrar</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Alunos Cadastrados</h2>
+      <ul id="lista-alunos"></ul>
+    </section>
+
+    <section>
+      <h2>Solicitação de Documentos</h2>
+      <form id="form-documento">
+        <select id="aluno-selecionado" required></select>
+        <select id="documento" required>
+          <option value="">-- Selecione um documento --</option>
+          <option value="Declaração de matrícula">Declaração de matrícula</option>
+          <option value="Boletim escolar">Boletim escolar</option>
+          <option value="Histórico escolar">Histórico escolar</option>
+        </select>
+        <button type="submit">Solicitar</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Solicitações Registradas</h2>
+      <ul id="lista-solicitacoes"></ul>
+    </section>
+  </main>
+
+  <script>
+    const alunos = [];
+    const solicitacoes = [];
+
+    const formAluno = document.getElementById('form-aluno');
+    const listaAlunos = document.getElementById('lista-alunos');
+    const alunoSelect = document.getElementById('aluno-selecionado');
+
+    const formDocumento = document.getElementById('form-documento');
+    const listaSolicitacoes = document.getElementById('lista-solicitacoes');
+
+    // Cadastrar aluno
+    formAluno.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nome = document.getElementById('nome').value.trim();
+      const turma = document.getElementById('turma').value.trim();
+
+      if (nome && turma) {
+        const aluno = { nome, turma };
+        alunos.push(aluno);
+        atualizarListaAlunos();
+        atualizarSelectAlunos();
+        formAluno.reset();
+      }
+    });
+
+    function atualizarListaAlunos() {
+      listaAlunos.innerHTML = '';
+      alunos.forEach((aluno) => {
+        const li = document.createElement('li');
+        li.textContent = `${aluno.nome} - Turma: ${aluno.turma}`;
+        listaAlunos.appendChild(li);
+      });
+    }
+
+    function atualizarSelectAlunos() {
+      alunoSelect.innerHTML = '';
+      alunos.forEach((aluno, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${aluno.nome} (${aluno.turma})`;
+        alunoSelect.appendChild(option);
+      });
+    }
+
+    // Solicitação de documento
+    formDocumento.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const alunoIndex = alunoSelect.value;
+      const tipoDocumento = document.getElementById('documento').value;
+
+      if (alunoIndex !== '' && tipoDocumento) {
+        const aluno = alunos[alunoIndex];
+        const solicitacao = {
+          nome: aluno.nome,
+          documento: tipoDocumento,
+          data: new Date().toLocaleString()
+        };
+        solicitacoes.push(solicitacao);
+        atualizarListaSolicitacoes();
+        formDocumento.reset();
+      }
+    });
+
+    function atualizarListaSolicitacoes() {
+      listaSolicitacoes.innerHTML = '';
+      solicitacoes.forEach((s) => {
+        const li = document.createElement('li');
+        li.textContent = `${s.nome} solicitou "${s.documento}" em ${s.data}`;
+        listaSolicitacoes.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
